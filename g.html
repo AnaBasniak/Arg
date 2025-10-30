@@ -5,66 +5,182 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Você foi eliminado</title>
 <style>
-:root{--bg:#000;--fg:#fff;--muted:#9a9a9a}
-*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Arial,monospace}
-.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.box{width:94%;max-width:820px;padding:28px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);text-align:center}
-.title{font-weight:900;font-size:clamp(24px,6vw,40px);margin:0}
-.sub{color:var(--muted);margin-top:10px}
-.scan{position:absolute;left:0;right:0;top:0;height:100%;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,0.02) 1px, transparent 4px);opacity:.06;mix-blend-mode:screen}
-.btns{margin-top:18px}
-</style>
-</head>
-<body>
-  <div class="scan" aria-hidden="true"></div>
-    <div class="wrap">
-        <div class="box" id="glitchBox">
-              <div style="font-size:13px;color:var(--muted)">— sistema: resposta registrada —</div>
-                    <h1 class="title" id="gl-title" data-text="Você foi eliminado.">Você foi eliminado.</h1>
-                          <div class="sub">Quer tentar novamente?</div>
-                                <div class="btns">
-                                        <button id="back">Voltar</button>
-                                              </div>
-                                                  </div>
-                                                    </div>
+:root{
+  --bg:#000; --fg:#fff; --muted:#9a9a9a; --danger:#c81010;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Arial,monospace}
+  body { overflow:hidden; }
 
-                                                    <script>
-                                                    const STORAGE_KEY = 'arg_block_v3';
-                                                    let state = {denies:0,blocked:false};
-                                                    try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw) state = JSON.parse(raw);}catch(e){}
+  /* full-screen background GIF */
+  .bg-gif {
+    position:fixed;
+      inset:0;
+        z-index:0;
+          background-size:cover;
+            background-position:center center;
+              background-repeat:no-repeat;
+                filter:grayscale(.2) contrast(.7) brightness(.25);
+                  will-change:transform,opacity;
+                  }
 
-                                                    const back = document.getElementById('back');
-                                                    const title = document.getElementById('gl-title');
+                  /* subtle overlay to ensure text legibility */
+                  .bg-overlay {
+                    position:fixed;
+                      inset:0;
+                        z-index:1;
+                          background:linear-gradient(180deg, rgba(0,0,0,.3), rgba(0,0,0,.6));
+                            pointer-events:none;
+                            }
 
-                                                    function microScramble(el, dur = 220){
-                                                      if(!el) return;
-                                                        const original = el.getAttribute('data-text') || el.textContent || '';
-                                                          const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#&*()[]{}<>/\\';
-                                                            let scrambled = '';
-                                                              for(let i=0;i<original.length;i++){
-                                                                  if(original[i] === ' ' || Math.random() > 0.14) scrambled += original[i];
-                                                                      else scrambled += chars.charAt(Math.floor(Math.random()*chars.length));
+                            /* scanlines and noise for "screen failing" feel */
+                            .scanlines {
+                              position:fixed; inset:0; z-index:2; pointer-events:none;
+                                background-image:
+                                    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 3px),
+                                        repeating-linear-gradient(180deg, rgba(255,255,255,0.01) 0 2px, transparent 2px 6px);
+                                          mix-blend-mode:screen;
+                                            opacity:.06;
+                                              filter:blur(.2px);
+                                              }
+
+                                              /* content card */
+                                              .wrap{position:relative;z-index:3;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+                                              .box{
+                                                width:94%;max-width:820px;padding:28px;border-radius:12px;
+                                                  background:linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.55));
+                                                    border:1px solid rgba(255,255,255,0.04);
+                                                      text-align:center;color:var(--fg);
+                                                        box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+                                                          backdrop-filter: blur(4px);
+                                                          }
+
+                                                          /* title glitch style */
+                                                          .title{font-weight:900;font-size:clamp(24px,6vw,40px);margin:10px 0}
+                                                          .title.small { font-size:16px; color:var(--muted); margin-top:6px; }
+
+                                                          /* micro jitter class */
+                                                          .jitter { animation: jitter 140ms linear infinite; }
+                                                          @keyframes jitter{
+                                                            0%{transform:translate(0,0)}
+                                                              25%{transform:translate(-1px,1px)}
+                                                                50%{transform:translate(1px,-1px)}
+                                                                  75%{transform:translate(-1px,0)}
+                                                                    100%{transform:translate(0,0)}
+                                                                    }
+
+                                                                    /* horizontal glitch slices for visual artifacts */
+                                                                    .slice {
+                                                                      position:absolute; left:0; right:0; height:12px; pointer-events:none; z-index:4;
+                                                                        mix-blend-mode:screen; opacity:.25; filter:blur(.2px);
                                                                         }
-                                                                          el.textContent = scrambled;
-                                                                            setTimeout(()=> { el.textContent = original; }, dur);
+                                                                        .slice.s1{ top:18%; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent); animation:sliceX 800ms infinite; transform:translateX(-10px); }
+                                                                        .slice.s2{ top:44%; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.03), transparent); animation:sliceX 1100ms infinite reverse; transform:translateX(8px); }
+                                                                        .slice.s3{ top:70%; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.02), transparent); animation:sliceX 950ms infinite; transform:translateX(-6px); }
+                                                                        @keyframes sliceX{ 0%{transform:translateX(-12px)}50%{transform:translateX(12px)}100%{transform:translateX(-12px)} }
+
+                                                                        /* small footer note (hidden visually low) */
+                                                                        .footer-note { position:fixed; left:10px; bottom:10px; z-index:5; color:rgba(255,255,255,0.06); font-size:12px; }
+
+                                                                        /* responsive */
+                                                                        @media (max-width:520px){
+                                                                          .title{font-size:28px}
+                                                                            .box{padding:18px}
                                                                             }
+                                                                            </style>
+                                                                            </head>
+                                                                            <body>
+                                                                              <!-- background GIF element (will be set by script) -->
+                                                                                <div id="bgGif" class="bg-gif" aria-hidden="true"></div>
+                                                                                  <div class="bg-overlay" aria-hidden="true"></div>
+                                                                                    <div class="scanlines" aria-hidden="true"></div>
 
-                                                                            /* efeito de glitch intensivo (nível 4) — loop por 5s */
-                                                                            let iterations = 0;
-                                                                            const interval = setInterval(()=>{
-                                                                              title.classList.add('jitter');
-                                                                                microScramble(title, 200);
-                                                                                  setTimeout(()=> title.classList.remove('jitter'), 180);
-                                                                                    iterations++;
-                                                                                      if(iterations > (5000/360)) clearInterval(interval);
-                                                                                      }, 360);
+                                                                                      <!-- slice artifacts -->
+                                                                                        <div class="slice s1" aria-hidden="true"></div>
+                                                                                          <div class="slice s2" aria-hidden="true"></div>
+                                                                                            <div class="slice s3" aria-hidden="true"></div>
 
-                                                                                      /* volta pra index depois de 5s */
-                                                                                      setTimeout(()=> { location.href = 'index.html'; }, 5000);
+                                                                                              <div class="wrap">
+                                                                                                  <div class="box" role="status" aria-live="polite" aria-atomic="true">
+                                                                                                        <div style="font-size:13px;color:var(--muted)">— sistema: resposta registrada —</div>
+                                                                                                              <h1 id="gl-title" class="title" data-text="Você foi eliminado.">Você foi eliminado.</h1>
+                                                                                                                    <div class="title small">Quer tentar novamente?</div>
+                                                                                                                        </div>
+                                                                                                                          </div>
 
-                                                                                      /* botão voltar (se tocar manualmente) */
-                                                                                      back.addEventListener('click', ()=> { location.href = 'index.html'; });
-                                                                                      </script>
-                                                                                      </body>
-                                                                                      </html>
-                                                                                      
+                                                                                                                            <div class="footer-note">A Chave — protocolo 0x4A</div>
+
+                                                                                                                            <script>
+                                                                                                                            /* CONFIG */
+                                                                                                                            const STORAGE_KEY = 'arg_block_v3';
+                                                                                                                            /* filename exatamente como você enviou (se preferir renomear no Replit, altere aqui) */
+                                                                                                                            const BG_RAW = 'f76f8c22-4f69-46a9-b8ee-4cfb8325e734.gif';
+                                                                                                                            const BG_ENC = encodeURI(BG_RAW);
+
+                                                                                                                            /* set background GIF immediately to avoid flash */
+                                                                                                                            function applyBackground(){
+                                                                                                                              const el = document.getElementById('bgGif');
+                                                                                                                                if(!el) return;
+                                                                                                                                  el.style.backgroundImage = `url("${BG_ENC}")`;
+                                                                                                                                    el.style.backgroundPosition = 'center center';
+                                                                                                                                      el.style.backgroundSize = 'cover';
+                                                                                                                                        el.style.backgroundRepeat = 'no-repeat';
+                                                                                                                                        }
+
+                                                                                                                                        /* micro scramble for text */
+                                                                                                                                        function microScramble(el, dur = 200){
+                                                                                                                                          if(!el) return;
+                                                                                                                                            const original = el.getAttribute('data-text') || el.textContent || '';
+                                                                                                                                              const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#*&%$';
+                                                                                                                                                let scrambled = '';
+                                                                                                                                                  for(let i=0;i<original.length;i++){
+                                                                                                                                                      if(original[i] === ' ' || Math.random() > 0.14) scrambled += original[i];
+                                                                                                                                                          else scrambled += chars.charAt(Math.floor(Math.random()*chars.length));
+                                                                                                                                                            }
+                                                                                                                                                              el.textContent = scrambled;
+                                                                                                                                                                setTimeout(()=> { el.textContent = original; }, dur);
+                                                                                                                                                                }
+
+                                                                                                                                                                /* run glitch loop for ~5s */
+                                                                                                                                                                function runGlitchSequence(){
+                                                                                                                                                                  const el = document.getElementById('gl-title');
+                                                                                                                                                                    if(!el) return;
+                                                                                                                                                                      let count = 0;
+                                                                                                                                                                        const iv = setInterval(()=>{
+                                                                                                                                                                            el.classList.add('jitter');
+                                                                                                                                                                                microScramble(el, 220);
+                                                                                                                                                                                    setTimeout(()=> el.classList.remove('jitter'), 180);
+                                                                                                                                                                                        count++;
+                                                                                                                                                                                            if(count > (5000/360)) clearInterval(iv);
+                                                                                                                                                                                              }, 360);
+                                                                                                                                                                                              }
+
+                                                                                                                                                                                              /* on load */
+                                                                                                                                                                                              document.addEventListener('DOMContentLoaded', ()=>{
+                                                                                                                                                                                                applyBackground();
+                                                                                                                                                                                                  runGlitchSequence();
+
+                                                                                                                                                                                                    // after ~5s, go back to index (same behavior as antes)
+                                                                                                                                                                                                      setTimeout(()=>{
+                                                                                                                                                                                                          // increment denies & persist (ensures state continues)
+                                                                                                                                                                                                              try {
+                                                                                                                                                                                                                    let state = {denies:1, blocked:false};
+                                                                                                                                                                                                                          const raw = localStorage.getItem(STORAGE_KEY);
+                                                                                                                                                                                                                                if(raw){
+                                                                                                                                                                                                                                        const p = JSON.parse(raw);
+                                                                                                                                                                                                                                                state.denies = Math.max((p.denies||0), 1);
+                                                                                                                                                                                                                                                        state.blocked = p.blocked || false;
+                                                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                                                                    // save with denies (we do not set blocked here; second NO will block)
+                                                                                                                                                                                                                                                                          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                                                                                                                                                                                                                                                                              } catch(e){}
+                                                                                                                                                                                                                                                                                  location.href = 'index.html';
+                                                                                                                                                                                                                                                                                    }, 5000);
+
+                                                                                                                                                                                                                                                                                      // also allow manual click to go back early
+                                                                                                                                                                                                                                                                                        document.body.addEventListener('click', ()=> { location.href = 'index.html'; }, {once:true});
+                                                                                                                                                                                                                                                                                        });
+                                                                                                                                                                                                                                                                                        </script>
+                                                                                                                                                                                                                                                                                        </body>
+                                                                                                                                                                                                                                                                                        </html>
+                                                                                                                                                                                                                                                                                        
