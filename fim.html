@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Bloqueado</title>
+<style>
+:root{--bg:#000;--danger:#c81010;--muted:#9a9a9a}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:#000;color:#fff;font-family:Inter,system-ui,Arial,monospace}
+.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0 18px}
+.final-bg{position:fixed;inset:0;background-size:cover;background-position:center center;filter:grayscale(.2) contrast(.75) brightness(.22);z-index:0}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1}
+.card{position:relative;z-index:2;max-width:920px;padding:28px;border-radius:10px;text-align:center}
+h1{color:var(--danger);font-size:clamp(26px,6vw,46px);margin:0;font-weight:900;text-shadow:0 10px 30px rgba(0,0,0,0.8)}
+p{color:rgba(200,0,0,0.92);margin-top:12px;font-size:18px;text-shadow:0 6px 18px rgba(0,0,0,0.7)}
+.rot{text-align:center;margin-top:18px;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+  <!-- background GIF file name with spaces/acentos encoded -->
+    <div id="bg" class="final-bg"></div>
+      <div class="overlay"></div>
+
+        <div class="wrap">
+            <div class="card">
+                  <h1 id="final-h">Perfeito, você fez sua decisão. Não tem como voltar mais</h1>
+                        <p id="final-p">Feche esta página. Não volte mais aqui.</p>
+                              <div class="rot" id="rot-msg">— bloqueado —</div>
+                                  </div>
+                                    </div>
+
+                                    <script>
+                                    const STORAGE_KEY = 'arg_block_v3';
+                                    const BG_NAME_RAW = "151 Sem Título.gif";
+                                    const BG_NAME = encodeURI(BG_NAME_RAW);
+                                    const rotMessages = [
+                                      "Por que voltou?",
+                                        "Eu disse para não retornar.",
+                                          "Suas escolhas têm testemunhas.",
+                                            "Você verá consequências."
+                                            ];
+                                            let rotIndex = 0;
+
+                                            /* define background */
+                                            document.getElementById('bg').style.backgroundImage = `url("${BG_NAME}")`;
+
+                                            /* persist state: garante que estamos bloqueados */
+                                            let state = {denies:2,blocked:true};
+                                            try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw) state = JSON.parse(raw);}catch(e){}
+                                            state.blocked = true;
+                                            state.denies = Math.max(state.denies || 2, 2);
+                                            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+                                            /* rotate messages every 4s (opção 3.B) */
+                                            const rot = document.getElementById('rot-msg');
+                                            setInterval(()=> {
+                                              rotIndex = (rotIndex + 1) % rotMessages.length;
+                                                rot.textContent = rotMessages[rotIndex];
+                                                }, 4000);
+
+                                                /* bloquear interação */
+                                                document.body.addEventListener('click', (e)=>{ e.stopPropagation(); }, true);
+                                                </script>
+                                                </body>
+                                                </html>
+                                                
