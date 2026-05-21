@@ -4,228 +4,82 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Você quer jogar um jogo?</title>
-
 <style>
 :root{--bg:#000;--fg:#fff;--muted:#9a9a9a;--danger:#c81010}
-*{box-sizing:border-box}
-html,body{
-  height:100%;
-    margin:0;
-      background:var(--bg);
-        color:var(--fg);
-          font-family:Inter,system-ui,Arial,monospace
-          }
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Inter,system-ui,Arial,monospace}
+.wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{width:100%;max-width:900px;text-align:center}
+h1{font-size:clamp(22px,6vw,44px);margin:0;font-weight:800}
+.sub{color:var(--muted);margin-top:10px;font-size:13px}
+.btns{display:flex;gap:18px;justify-content:center;margin-top:28px}
+button{background:transparent;border:1.6px solid var(--fg);color:var(--fg);padding:12px 24px;border-radius:8px;cursor:pointer;font-weight:700}
+button[disabled]{opacity:.36;cursor:not-allowed}
+.tiny{color:var(--muted);font-size:13px;margin-top:8px}
+footer{position:fixed;left:10px;bottom:10px;color:rgba(255,255,255,.06);font-size:12px}
+.locked { color: var(--danger); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+      <div class="card">
+            <div style="margin-bottom:8px">✦</div>
+                  <h1 id="home-text">Você quer jogar um jogo?</h1>
+                        <div class="sub">Escolha com atenção.</div>
 
-          .wrap{
-            min-height:100vh;
-              display:flex;
-                align-items:center;
-                  justify-content:center;
-                    padding:24px
-                    }
+                              <div class="btns" role="group" aria-label="respostas">
+                                      <button id="btn-yes">SIM</button>
+                                              <button id="btn-no">NÃO</button>
+                                                    </div>
+                                                          <div class="tiny">Toque com cuidado — escolhas têm peso.</div>
+                                                              </div>
+                                                                </div>
 
-                    .card{
-                      width:100%;
-                        max-width:900px;
-                          text-align:center
-                          }
+                                                                  <footer>A Chave — protocolo 0x4A</footer>
 
-                          h1{
-                            font-size:clamp(22px,6vw,44px);
-                              margin:0;
-                                font-weight:800
-                                }
+                                                                  <script>
+                                                                  const STORAGE_KEY = 'arg_block_v3';
+                                                                  const WHATSAPP_LINK = 'https://chat.whatsapp.com/BfByCXi4S4sC8KOFqkNwk0?mode=wwt';
 
-                                .sub{
-                                  color:var(--muted);
-                                    margin-top:10px;
-                                      font-size:13px
-                                      }
+                                                                  // carrega estado
+                                                                  let state = { denies:0, blocked:false };
+                                                                  try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw) state = JSON.parse(raw);}catch(e){}
 
-                                      .btns{
-                                        display:flex;
-                                          gap:18px;
-                                            justify-content:center;
-                                              margin-top:28px
-                                              }
+                                                                  const btnYes = document.getElementById('btn-yes');
+                                                                  const btnNo = document.getElementById('btn-no');
+                                                                  const homeText = document.getElementById('home-text');
 
-                                              button{
-                                                background:transparent;
-                                                  border:1.6px solid var(--fg);
-                                                    color:var(--fg);
-                                                      padding:12px 24px;
-                                                        border-radius:8px;
-                                                          cursor:pointer;
-                                                            font-weight:700
-                                                            }
+                                                                  function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+                                                                  function applyBlockedVisuals(){
+                                                                    homeText.classList.add('locked');
+                                                                      btnYes.disabled = true;
+                                                                        btnNo.disabled = true;
+                                                                        }
+                                                                        if(state.blocked) applyBlockedVisuals();
 
-                                                            button[disabled]{
-                                                              opacity:.36;
-                                                                cursor:not-allowed
-                                                                }
+                                                                        // SIM -> irá para página de confirmação (screen confirm)
+                                                                        btnYes.addEventListener('click', ()=>{
+                                                                          if(state.blocked) return;
+                                                                            // abrir confirmação (página local)
+                                                                              location.href = 'confirm.html';
+                                                                              });
 
-                                                                .tiny{
-                                                                  color:var(--muted);
-                                                                    font-size:13px;
-                                                                      margin-top:8px
-                                                                      }
+                                                                              // NÃO -> primeiro clique vai pra g.html (glitch); segundo clique vai direto pra fim.html
+                                                                              btnNo.addEventListener('click', ()=>{
+                                                                                if(state.blocked) return;
+                                                                                  state.denies = Math.min(state.denies + 1, 99);
+                                                                                    save();
+                                                                                      if(state.denies === 1){
+                                                                                          location.href = 'g.html';
+                                                                                            } else if(state.denies >= 2){
+                                                                                                location.href = 'fim.html';
+                                                                                                  }
+                                                                                                  });
 
-                                                                      footer{
-                                                                        position:fixed;
-                                                                          left:10px;
-                                                                            bottom:10px;
-                                                                              color:rgba(255,255,255,.06);
-                                                                                font-size:12px
-                                                                                }
-
-                                                                                .locked {
-                                                                                  color: var(--danger);
-                                                                                  }
-                                                                                  </style>
-                                                                                  </head>
-
-                                                                                  <body>
-
-                                                                                  <div class="wrap">
-                                                                                    <div class="card">
-
-                                                                                        <div style="margin-bottom:8px">✦</div>
-
-                                                                                            <h1 id="home-text">Você quer jogar um jogo?</h1>
-
-                                                                                                <div class="sub">Escolha com atenção.</div>
-
-                                                                                                    <div class="btns" role="group" aria-label="respostas">
-                                                                                                          <button id="btn-yes">SIM</button>
-                                                                                                                <button id="btn-no">NÃO</button>
-                                                                                                                    </div>
-
-                                                                                                                        <div class="tiny">
-                                                                                                                              Toque com cuidado — escolhas têm peso.
-                                                                                                                                  </div>
-
-                                                                                                                                    </div>
-                                                                                                                                    </div>
-
-                                                                                                                                    <footer>A Chave — protocolo 0x4A</footer>
-
-                                                                                                                                    <script>
-
-                                                                                                                                    const STORAGE_KEY = 'arg_block_v3';
-                                                                                                                                    const WHATSAPP_LINK = 'https://chat.whatsapp.com/BfByCXi4S4sC8KOFqkNwk0';
-
-                                                                                                                                    /* carrega estado */
-                                                                                                                                    let state = { denies:0, blocked:false };
-
-                                                                                                                                    try{
-                                                                                                                                      const raw = localStorage.getItem(STORAGE_KEY);
-
-                                                                                                                                        if(raw){
-                                                                                                                                            state = JSON.parse(raw);
-                                                                                                                                              }
-
-                                                                                                                                              }catch(e){}
-
-                                                                                                                                              const btnYes = document.getElementById('btn-yes');
-                                                                                                                                              const btnNo = document.getElementById('btn-no');
-                                                                                                                                              const homeText = document.getElementById('home-text');
-
-                                                                                                                                              function save(){
-                                                                                                                                                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-                                                                                                                                                }
-
-                                                                                                                                                function applyBlockedVisuals(){
-                                                                                                                                                  homeText.classList.add('locked');
-
-                                                                                                                                                    btnYes.disabled = true;
-                                                                                                                                                      btnNo.disabled = true;
-                                                                                                                                                      }
-
-                                                                                                                                                      /* =========================
-                                                                                                                                                         BLOQUEIO PERMANENTE
-                                                                                                                                                         ========================= */
-
-                                                                                                                                                         if(state.blocked){
-
-                                                                                                                                                           document.body.innerHTML = `
-                                                                                                                                                             
-                                                                                                                                                               <div class="wrap">
-                                                                                                                                                                   <div class="card">
-
-                                                                                                                                                                         <h1 class="locked">
-                                                                                                                                                                                 Perfeito. Você fez sua decisão.
-                                                                                                                                                                                       </h1>
-
-                                                                                                                                                                                             <div class="sub">
-                                                                                                                                                                                                     A casca já foi marcada.
-                                                                                                                                                                                                           </div>
-
-                                                                                                                                                                                                               </div>
-                                                                                                                                                                                                                 </div>
-
-                                                                                                                                                                                                                   `;
-
-                                                                                                                                                                                                                     throw new Error("blocked");
-                                                                                                                                                                                                                     }
-
-                                                                                                                                                                                                                     /* =========================
-                                                                                                                                                                                                                        BOTÃO SIM
-                                                                                                                                                                                                                        ========================= */
-
-                                                                                                                                                                                                                        btnYes.addEventListener('click', ()=>{
-
-                                                                                                                                                                                                                          if(state.blocked) return;
-
-                                                                                                                                                                                                                            location.href = 'confirm.html';
-                                                                                                                                                                                                                            });
-
-                                                                                                                                                                                                                            /* =========================
-                                                                                                                                                                                                                               BOTÃO NÃO
-                                                                                                                                                                                                                               ========================= */
-
-                                                                                                                                                                                                                               btnNo.addEventListener('click', ()=>{
-
-                                                                                                                                                                                                                                 if(state.blocked) return;
-
-                                                                                                                                                                                                                                   state.denies = Math.min(state.denies + 1, 99);
-
-                                                                                                                                                                                                                                     save();
-
-                                                                                                                                                                                                                                       /* PRIMEIRO NÃO */
-                                                                                                                                                                                                                                         if(state.denies === 1){
-
-                                                                                                                                                                                                                                             location.href = 'g.html';
-
-                                                                                                                                                                                                                                               }
-
-                                                                                                                                                                                                                                                 /* SEGUNDO NÃO */
-                                                                                                                                                                                                                                                   else if(state.denies >= 2){
-
-                                                                                                                                                                                                                                                       state.blocked = true;
-
-                                                                                                                                                                                                                                                           save();
-
-                                                                                                                                                                                                                                                               location.href = 'fim.html';
-                                                                                                                                                                                                                                                                 }
-
-                                                                                                                                                                                                                                                                 });
-
-                                                                                                                                                                                                                                                                 /* =========================
-                                                                                                                                                                                                                                                                    RESET ORGANIZADOR
-                                                                                                                                                                                                                                                                    ========================= */
-
-                                                                                                                                                                                                                                                                    document.querySelector('footer').addEventListener('click', ()=>{
-
-                                                                                                                                                                                                                                                                      if(confirm('Resetar estado do site (organizadores)?')){
-
-                                                                                                                                                                                                                                                                          localStorage.removeItem(STORAGE_KEY);
-
-                                                                                                                                                                                                                                                                              location.reload();
-                                                                                                                                                                                                                                                                                }
-
-                                                                                                                                                                                                                                                                                });
-
-                                                                                                                                                                                                                                                                                </script>
-
-                                                                                                                                                                                                                                                                                </body>
-                                                                                                                                                                                                                                                                                </html>
+                                                                                                  /* dev: reset rápido (long press not available easily on mobile) */
+                                                                                                  document.querySelector('footer').addEventListener('click', ()=>{
+                                                                                                    if(confirm('Resetar estado do site (organizadores)?')){ localStorage.removeItem(STORAGE_KEY); location.reload(); }
+                                                                                                    });
+                                                                                                    </script>
+                                                                                                    </body>
+                                                                                                    </html>
+                                                                                                    
