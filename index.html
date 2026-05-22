@@ -54,7 +54,20 @@ footer{position:fixed;left:10px;bottom:10px;color:rgba(255,255,255,.06);font-siz
                                                                       btnYes.disabled = true;
                                                                         btnNo.disabled = true;
                                                                         }
-                                                                        if(state.blocked) applyBlockedVisuals();
+                                                                        if(state.blocked){
+
+                                                                          document.body.innerHTML = `
+                                                                          <div class="wrap">
+                                                                          <div class="card">
+                                                                          <h1 class="locked">Perfeito. Você fez sua decisão.</h1>
+                                                                          <div class="sub">Não tem como voltar mais.</div>
+                                                                          </div>
+                                                                          </div>
+                                                                          `;
+                                                                          
+                                                                          throw new Error("blocked");
+                                                                          
+                                                                          }
 
                                                                         // SIM -> irá para página de confirmação (screen confirm)
                                                                         btnYes.addEventListener('click', ()=>{
@@ -70,10 +83,14 @@ footer{position:fixed;left:10px;bottom:10px;color:rgba(255,255,255,.06);font-siz
                                                                                     save();
                                                                                       if(state.denies === 1){
                                                                                           location.href = 'g.html';
-                                                                                            } else if(state.denies >= 2){
-                                                                                                location.href = 'fim.html';
-                                                                                                  }
-                                                                                                  });
+                                                                                           } else if(state.denies >= 2){
+
+                                                                                                    state.blocked = true;
+                                                                                                    save();
+                                                                                                
+                                                                                                    location.href = 'fim.html';
+                                                                                                
+                                                                                                }
 
                                                                                                   /* dev: reset rápido (long press not available easily on mobile) */
                                                                                                   document.querySelector('footer').addEventListener('click', ()=>{
